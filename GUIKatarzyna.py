@@ -37,16 +37,35 @@ class MyWidget(QtGui.QWidget):
         self.a = 40
         self.keys = [False, False, False, False]
 
-        a =  [[200, 100], [205, 110], [211, 122], [217, 120], [221, 125], [224, 130], [225, 127],
-                          [224, 130], [225, 132], [231, 132], [237, 135], [238, 135], [244, 138], [245, 137],
+        a = [[300, 300], [300, 303], [300, 307], [302, 312], [300, 313], [301, 320], [300, 322], [300, 326],
+             [300, 328], [300, 331], [301, 335], [300, 340], [300, 345]]
+
+        ab = [[300, 300], [300, 303], [300, 307], [302, 312], [300, 313], [301, 320], [300, 322], [300, 326],
+             [300, 328], [300, 331], [301, 335], [300, 340], [300, 345],
+             [200, 100], [205, 110], [211, 122], [217, 120], [221, 125], [224, 130], [225, 127],
+             [224, 130], [225, 132], [231, 132], [237, 135], [238, 135], [244, 138], [245, 137],
+             [246, 138], [246, 138], [242, 142], [227, 145], [245, 145], [251, 148], [252, 147],
+              [253, 144], [255, 142], [256, 140], [257, 135], [260, 133], [260, 128], [263, 125],
+              [265, 124], [270, 122], [273, 120], [277, 116], [277, 107], [279, 118], [280, 108]]
+
+        b = [[200, 100], [205, 110], [211, 122], [217, 120], [221, 125], [224, 130], [225, 127],
+                         [224, 130], [225, 132], [231, 132], [237, 135], [238, 135], [244, 138], [245, 137],
                           [246, 138], [246, 138], [242, 142], [227, 145], [245, 145], [251, 148], [252, 147]]
-        self.landmarks = a
-        
+
+        drugaStrona = [[253, 144], [255, 142], [256, 140], [257, 135], [260, 133], [260, 128], [263, 125],
+              [265, 124], [270, 122], [273, 120], [277, 116], [277, 107], [279, 118], [280, 108]]
+
+        d = [[253, 144], [255, 142], [256, 140], [261, 135] ]#[[200, 200], [150, 170], [110, 130]]
+
+        self.landmarks = ab
+
 
     def showEvent(self, event):
+
         self.timer = self.startTimer(30)
 
     def timerEvent(self, event):
+
         if self.keys[0]:
             self.theta -= 2
         elif self.keys[1]:
@@ -63,8 +82,8 @@ class MyWidget(QtGui.QWidget):
     def paintEvent(self, e):
         qp = QtGui.QPainter()
         qp.begin(self)
-        self.drawRobot(qp)
         self.drawLandmarks(qp)
+        self.drawRobot(qp)
         qp.end()
 
 
@@ -97,27 +116,59 @@ class MyWidget(QtGui.QWidget):
             Ex2 = Ex2 + sth[0]**2
 
         n = len(self.landmarks)
+
         a = (n*Exy - Ex*Ey)/(n*Ex2 - Ex**2)
         b = Ey/n - a*Ex/n
 
+        if landmarks[0][0] - landmarks[len(landmarks) - 1][0] < 0:
+            a = a
+
         return [a, b]
+
+    def paintLandGroup(self, landmarks, qp):
+        a, b = self.leastSquares(landmarks)
+        print(a, b)
+        if a < 0.1:
+            x0 = landmarks[0][0]
+            y0 = landmarks[0][1]
+            x1 = landmarks[len(landmarks) - 1][0]
+            y1 = landmarks[len(landmarks) - 1][1]
+        else:
+            x0 = landmarks[0][0]
+            y0 = a*x0 + b
+
+            x1 = landmarks[len(landmarks) - 1][0]
+            y1 = a*x1 + b
+
+        qp.drawLine(x0, y0, x1, y1)
+
+    def closersPoint(self, point):
+        pLists = []
+        for lm in self.landmarks:
+            if m.sqrt((point[0] - lm[0])**2 + (point[1] - lm[1])**2) < 7:
+                w = m.sqrt((point[0] - lm[0])**2 + (point[1] - lm[1])**2)
+                pLists.append(lm)
+            if len(pLists) > 10:
+                break
+        return pLists
+
+        pass
 
 
     def drawLandmarks(self, qp):
 
-
         for sth in self.landmarks:
             qp.drawPoint(sth[0],   sth[1])
-
-        a, b = self.leastSquares(self.landmarks)
-        x0 = self.landmarks[0][0]
-        y0 = a*x0 + b
-
-        x1 = 500
-        y1 = a*x1 + b
+            if len(self.landmarks) > 2:
+                pList = self.closersPoint(sth)
+                self.paintLandGroup(pList, qp)
+        #self.paintLandGroup(self.landmarks, qp)
 
 
-        qp.drawLine(x0, y0, x1, y1)
+
+
+        #self.paintLandGroup(self.landmarks, qp)
+        #qp.drawLine(x0, y0, x1, y1)
 
 
         #qp.drawPoint(160,   61)
@@ -147,6 +198,7 @@ class Ui_Form(object):
         self.widget = MyWidget(Form)
         self.widget.setGeometry(QtCore.QRect(20, 20, 771, 551))
         self.widget.setObjectName(_fromUtf8("widget"))
+
 
         self.widget.setFocus()
         self.retranslateUi(Form)

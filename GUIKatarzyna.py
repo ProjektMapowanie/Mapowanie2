@@ -37,7 +37,11 @@ class MyWidget(QtGui.QWidget):
         self.a = 40
         self.keys = [False, False, False, False]
 
-        self.landmarks = [[100, 200], [300, 210]]
+        a =  [[200, 100], [205, 110], [211, 122], [217, 120], [221, 125], [224, 130], [225, 127],
+                          [224, 130], [225, 132], [231, 132], [237, 135], [238, 135], [244, 138], [245, 137],
+                          [246, 138], [246, 138], [242, 142], [227, 145], [245, 145], [251, 148], [252, 147]]
+        self.landmarks = a
+        
 
     def showEvent(self, event):
         self.timer = self.startTimer(30)
@@ -84,8 +88,38 @@ class MyWidget(QtGui.QWidget):
         elif e.key() == QtCore.Qt.Key_Down:
             self.keys[3] = False
 
+    def leastSquares(self, landmarks):
+        Exy = Ex = Ey = Ex2 = 0
+        for sth in landmarks:
+            Exy = Exy + sth[0]*sth[1]
+            Ex = Ex + sth[0]
+            Ey = Ey + sth[1]
+            Ex2 = Ex2 + sth[0]**2
+
+        n = len(self.landmarks)
+        a = (n*Exy - Ex*Ey)/(n*Ex2 - Ex**2)
+        b = Ey/n - a*Ex/n
+
+        return [a, b]
+
+
     def drawLandmarks(self, qp):
-        qp.drawPoint(160,   60)
+
+
+        for sth in self.landmarks:
+            qp.drawPoint(sth[0],   sth[1])
+
+        a, b = self.leastSquares(self.landmarks)
+        x0 = self.landmarks[0][0]
+        y0 = a*x0 + b
+
+        x1 = 500
+        y1 = a*x1 + b
+
+
+        qp.drawLine(x0, y0, x1, y1)
+
+
         #qp.drawPoint(160,   61)
         #qp.drawPoint(160,   62)
         #qp.drawPoint(160,   63)

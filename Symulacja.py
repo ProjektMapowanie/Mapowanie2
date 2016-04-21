@@ -1,14 +1,13 @@
 import time
 from threading import Thread
-import serial
 
-import serial
+#import serial
 import struct
 
 
 class Symulacja():
     def __init__(self):
-        #self.ser = serial.Serial("COM5", 256000)
+#        self.ser = serial.Serial("COM5", 256000)
         t = Thread(target=self.func, args=())
         t2 = Thread(target=self.joinLandmark, args=())
         arduino_thread = Thread(target=self.readArduino, args=())

@@ -61,8 +61,11 @@ class MyWidget(QtGui.QWidget):
         self.y = self.object.coord[1]
         self.theta = self.object.coord[2]
         self.trace.append([self.x, self.y])
-        self.landmarks.append(self.object.point)
+
+
+        #self.landmarks.append(self.object.point)
         self.update()
+
 
     def paintEvent(self, e):
         qp = QtGui.QPainter()
